@@ -17,11 +17,11 @@ public class UploadService {
     public String uploadFileToCloudinary(MultipartFile file) throws IOException {
         // upload file to cloudinary
         Map<?,?> results = cloudinary.uploader().upload(
-                file.getBytes(),
+                file.getBytes(), // kiểu dữ liệu mảng nhị phân
                 ObjectUtils.emptyMap()
         );
         // Lưu vào db đường dẫn
-
         return results.get("secure_url").toString();
+
     }
 }

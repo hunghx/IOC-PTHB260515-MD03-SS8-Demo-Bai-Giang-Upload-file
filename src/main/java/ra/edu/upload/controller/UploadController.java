@@ -3,13 +3,15 @@ package ra.edu.upload.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ra.edu.upload.model.EmailRequest;
+import ra.edu.upload.model.JobOfferRequest;
+import ra.edu.upload.service.MailService;
+import ra.edu.upload.service.UploadDriveService;
 import ra.edu.upload.service.UploadService;
 
+import jakarta.mail.MessagingException;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -21,6 +23,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UploadController {
     private final UploadService uploadService;
+    private final UploadDriveService uploadDriveService;
+    private final MailService mailService;
     private static final String UPLOAD_PATH = "D:\\uploads-image\\";
     private LocalDateTime now;
 
@@ -51,6 +55,30 @@ public class UploadController {
 
         // upload cloud
         String urlUploadFile = uploadService.uploadFileToCloudinary(file);
+
         return "Đã gửi file lên server: "+ urlUploadFile;
+    }
+
+    @PostMapping("/drive")
+    public String uploadToDrive(@RequestParam MultipartFile file) throws IOException {
+
+        return "Url truy cap: " + uploadDriveService.uploadFileToDrive(file);
+    }
+
+    @PostMapping("/mail")
+    public String sendEmail(@RequestBody EmailRequest request){
+        mailService.sendMail(request.getTo(), request.getSubject(), request.getContent());
+        return "Email sent successfully";
+    }
+
+    @PostMapping("/job-offer")
+    public String sendJobOffer(@RequestBody JobOfferRequest request) throws MessagingException {
+        mailService.sendJobOfferMail(
+                request.getTo(),
+                request.getCandidateName(),
+                request.getJobTitle(),
+                request.getCompanyName()
+        );
+        return "Job offer email sent successfully";
     }
 }
